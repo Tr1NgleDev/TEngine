@@ -85,17 +85,17 @@ namespace TEngine
 	class Tween
 	{
 	protected:
-		double time = 0;
-
-		Easings::EasingFunctions easing = Easings::Linear;
-		double duration = 0;
-
 		virtual void update() = NULL;
 
 		void addTo(GameState* state);
 
 		friend class GameState;
 	public:
+		double time = 0.0;
+
+		Easings::EasingFunctions easing = Easings::Linear;
+		double duration = 0.0;
+
 		inline static double globalSpeed = 1.0;
 	};
 	class TweenFloat : public Tween

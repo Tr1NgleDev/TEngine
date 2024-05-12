@@ -367,7 +367,7 @@ void TEngine::MainGame::setWindowedFullscreen()
 	glfwGetWindowPos(_glfwWindow, &_prevWindowedX, &_prevWindowedY);
 
 	glfwSetWindowMonitor(_glfwWindow, nullptr, _prevWindowedX, _prevWindowedY, _prevWindowedW, _prevWindowedH, GLFW_DONT_CARE);
-
+	
 	GLFWmonitor* primaryMonitor = glfwGetPrimaryMonitor();
 	const GLFWvidmode* mode = glfwGetVideoMode(primaryMonitor);
 

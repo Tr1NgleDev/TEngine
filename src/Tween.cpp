@@ -22,7 +22,7 @@ TweenFloat::TweenFloat(GameState* state, double duration, Easings::EasingFunctio
 }
 void TweenFloat::update()
 {
-    *obj = std::lerp(startV, targetV, (float)Easings::ease(time / duration, easing));
+    *obj = glm::mix(startV, targetV, (float)Easings::ease(time / duration, easing));
 }
 
 TweenDouble::TweenDouble(GameState* state, double duration, Easings::EasingFunctions easing, double* obj, double value)
@@ -36,7 +36,7 @@ TweenDouble::TweenDouble(GameState* state, double duration, Easings::EasingFunct
 }
 void TweenDouble::update()
 {
-    *obj = std::lerp(startV, targetV, Easings::ease(time / duration, easing));
+    *obj = glm::mix(startV, targetV, Easings::ease(time / duration, easing));
 }
 
 TweenVec2::TweenVec2(GameState* state, double duration, Easings::EasingFunctions easing, glm::vec2* obj, const glm::vec2& value)
@@ -50,8 +50,7 @@ TweenVec2::TweenVec2(GameState* state, double duration, Easings::EasingFunctions
 }
 void TweenVec2::update()
 {
-    obj->x = std::lerp(startV.x, targetV.x, (float)Easings::ease(time / duration, easing));
-    obj->y = std::lerp(startV.y, targetV.y, (float)Easings::ease(time / duration, easing));
+    *obj = glm::mix(startV, targetV, (float)Easings::ease(time / duration, easing));
 }
 
 TweenInt::TweenInt(GameState* state, double duration, Easings::EasingFunctions easing, int* obj, int value)
@@ -65,7 +64,7 @@ TweenInt::TweenInt(GameState* state, double duration, Easings::EasingFunctions e
 }
 void TweenInt::update()
 {
-    *obj = (int)std::lerp((double)startV, (double)targetV, Easings::ease(time / duration, easing));
+    *obj = (int)glm::mix((double)startV, (double)targetV, Easings::ease(time / duration, easing));
 }
 
 TweenColor::TweenColor(GameState* state, double duration, Easings::EasingFunctions easing, Color* obj, const Color& value)
@@ -79,10 +78,10 @@ TweenColor::TweenColor(GameState* state, double duration, Easings::EasingFunctio
 }
 void TweenColor::update()
 {
-    obj->r = std::lerp(startV.r, targetV.r, (float)Easings::ease(time / duration, easing));
-    obj->g = std::lerp(startV.g, targetV.g, (float)Easings::ease(time / duration, easing));
-    obj->b = std::lerp(startV.b, targetV.b, (float)Easings::ease(time / duration, easing));
-    obj->a = std::lerp(startV.a, targetV.a, (float)Easings::ease(time / duration, easing));
+    obj->r = glm::mix(startV.r, targetV.r, (float)Easings::ease(time / duration, easing));
+    obj->g = glm::mix(startV.g, targetV.g, (float)Easings::ease(time / duration, easing));
+    obj->b = glm::mix(startV.b, targetV.b, (float)Easings::ease(time / duration, easing));
+    obj->a = glm::mix(startV.a, targetV.a, (float)Easings::ease(time / duration, easing));
 }
 
 double Easings::ease(double t, EasingFunctions easing)
@@ -155,19 +154,19 @@ double Easings::ease(double t, EasingFunctions easing)
 double Easings::easeInSine(double t)
 {
     t = glm::clamp(t, 0.0, 1.0);
-    return sin(HALF_PI_D * t);
+    return 1 - cos(HALF_PI_D * t);
 }
 
 double Easings::easeOutSine(double t)
 {
     t = glm::clamp(t, 0.0, 1.0);
-    return 1 + sin(HALF_PI_D * (--t));
+    return sin(HALF_PI_D * t);
 }
 
 double Easings::easeInOutSine(double t)
 {
     t = glm::clamp(t, 0.0, 1.0);
-    return 0.5 * (1 + sin(PI_D * (t - 0.5)));
+    return -(cos(PI_D * t) - 1) * 0.5;
 }
 
 double Easings::easeInQuad(double t)
@@ -179,13 +178,13 @@ double Easings::easeInQuad(double t)
 double Easings::easeOutQuad(double t)
 {
     t = glm::clamp(t, 0.0, 1.0);
-    return t * (2 - t);
+    return 1 - (1 - t) * (1 - t);
 }
 
 double Easings::easeInOutQuad(double t)
 {
     t = glm::clamp(t, 0.0, 1.0);
-    return t < 0.5 ? 2 * t * t : t * (4 - 2 * t) - 1;
+    return t < 0.5 ? 2 * t * t : 1 - pow(-2 * t + 2, 2)* 0.5;
 }
 
 double Easings::easeInCubic(double t)
@@ -197,189 +196,186 @@ double Easings::easeInCubic(double t)
 double Easings::easeOutCubic(double t)
 {
     t = glm::clamp(t, 0.0, 1.0);
-    return 1 + (--t) * t * t;
+    return 1 - pow(1 - t, 3);
 }
 
 double Easings::easeInOutCubic(double t)
 {
     t = glm::clamp(t, 0.0, 1.0);
-    return t < 0.5 ? 4 * t * t * t : 1 + (--t) * (2 * (--t)) * (2 * t);
+    return t < 0.5 ? 4 * t * t * t : 1 - pow(-2 * t + 2, 3)* 0.5;
 }
 
 double Easings::easeInQuart(double t)
 {
     t = glm::clamp(t, 0.0, 1.0);
-    t *= t;
-    return t * t;
+    return t * t * t * t;
 }
 
 double Easings::easeOutQuart(double t)
 {
     t = glm::clamp(t, 0.0, 1.0);
-    t = (--t) * t;
-    return 1 - t * t;
+    return 1 - pow(1 - t, 4);
 }
 
 double Easings::easeInOutQuart(double t)
 {
     t = glm::clamp(t, 0.0, 1.0);
-    if (t < 0.5) {
-        t *= t;
-        return 8 * t * t;
-    }
-    else {
-        t = (--t) * t;
-        return 1 - 8 * t * t;
-    }
+    return t < 0.5 ? 8 * t * t * t * t : 1 - pow(-2 * t + 2, 4)* 0.5;
 }
 
 double Easings::easeInQuint(double t)
 {
     t = glm::clamp(t, 0.0, 1.0);
-    double t2 = t * t;
-    return t * t2 * t2;
+    return t * t * t * t * t;
 }
 
 double Easings::easeOutQuint(double t)
 {
     t = glm::clamp(t, 0.0, 1.0);
-    double t2 = (--t) * t;
-    return 1 + t * t2 * t2;
+    return 1 - pow(1 - t, 5);
 }
 
 double Easings::easeInOutQuint(double t)
 {
     t = glm::clamp(t, 0.0, 1.0);
-    double t2;
-    if (t < 0.5) {
-        t2 = t * t;
-        return 16 * t * t2 * t2;
-    }
-    else {
-        t2 = (--t) * t;
-        return 1 + 16 * t * t2 * t2;
-    }
+    return t < 0.5 ? 16 * t * t * t * t * t : 1 - pow(-2 * t + 2, 5)* 0.5;
 }
 
 double Easings::easeInExpo(double t)
 {
     t = glm::clamp(t, 0.0, 1.0);
-    return (pow(2, 8 * t) - 1) / 255;
+    return t == 0 ? 0 : pow(2, 10 * t - 10);
 }
 
 double Easings::easeOutExpo(double t)
 {
     t = glm::clamp(t, 0.0, 1.0);
-    return 1 - pow(2, -8 * t);
+    return t == 1 ? 1 : 1 - pow(2, -10 * t);
 }
 
 double Easings::easeInOutExpo(double t)
 {
     t = glm::clamp(t, 0.0, 1.0);
-    if (t < 0.5) {
-        return (pow(2, 16 * t) - 1) / 510;
-    }
-    else {
-        return 1 - 0.5 * pow(2, -16 * (t - 0.5));
-    }
+    return t == 0
+        ? 0
+        : t == 1
+        ? 1
+        : t < 0.5 ? pow(2, 20 * t - 10)* 0.5
+        : (2 - pow(2, -20 * t + 10))* 0.5;
 }
 
 double Easings::easeInCirc(double t)
 {
     t = glm::clamp(t, 0.0, 1.0);
-    return 1 - sqrt(1 - t);
+    return 1 - sqrt(1 - pow(t, 2));
 }
 
 double Easings::easeOutCirc(double t)
 {
     t = glm::clamp(t, 0.0, 1.0);
-    return sqrt(t);
+    return sqrt(1 - pow(t - 1, 2));
 }
 
 double Easings::easeInOutCirc(double t)
 {
     t = glm::clamp(t, 0.0, 1.0);
-    if (t < 0.5) {
-        return (1 - sqrt(1 - 2 * t)) * 0.5;
-    }
-    else {
-        return (1 + sqrt(2 * t - 1)) * 0.5;
-    }
+    return t < 0.5
+        ? (1 - sqrt(1 - pow(2 * t, 2)))* 0.5
+        : (sqrt(1 - pow(-2 * t + 2, 2)) + 1)* 0.5;
 }
 
 double Easings::easeInBack(double t)
 {
+    const double c1 = 1.70158;
+    const double c3 = c1 + 1;
+
     t = glm::clamp(t, 0.0, 1.0);
-    return t * t * (2.70158 * t - 1.70158);
+    return c3 * t * t * t - c1 * t * t;
 }
 
 double Easings::easeOutBack(double t)
 {
+    const double c1 = 1.70158;
+    const double c3 = c1 + 1;
+
     t = glm::clamp(t, 0.0, 1.0);
-    return 1 + (--t) * t * (2.70158 * t + 1.70158);
+    return 1 + c3 * pow(t - 1, 3) + c1 * pow(t - 1, 2);
 }
 
 double Easings::easeInOutBack(double t)
 {
+    const double c1 = 1.70158;
+    const double c2 = c1 * 1.525;
+
     t = glm::clamp(t, 0.0, 1.0);
-    if (t < 0.5) {
-        return t * t * (7 * t - 2.5) * 2;
-    }
-    else {
-        return 1 + (--t) * t * 2 * (7 * t + 2.5);
-    }
+    return t < 0.5
+        ? (pow(2 * t, 2) * ((c2 + 1) * 2 * t - c2)) * 0.5
+        : (pow(2 * t - 2, 2) * ((c2 + 1) * (t * 2 - 2) + c2) + 2) * 0.5;
 }
 
 double Easings::easeInElastic(double t)
 {
+    const double c4 = (2 * PI_D) / 3;
+
     t = glm::clamp(t, 0.0, 1.0);
-    double t2 = t * t;
-    return t2 * t2 * sin(t * PI_D * 4.5);
+
+    return t == 0
+        ? 0
+        : t == 1
+        ? 1
+        : -pow(2, 10 * t - 10) * sin((t * 10 - 10.75) * c4);
 }
 
 double Easings::easeOutElastic(double t)
 {
+    const double c4 = (2 * PI_D) / 3;
+
     t = glm::clamp(t, 0.0, 1.0);
-    double t2 = (t - 1) * (t - 1);
-    return 1 - t2 * t2 * cos(t * PI_D * 4.5);
+    return t == 0
+        ? 0
+        : t == 1
+        ? 1
+        : pow(2, -10 * t) * sin((t * 10 - 0.75) * c4) + 1;
 }
 
 double Easings::easeInOutElastic(double t)
 {
+    const double c5 = (2 * PI_D) / 4.5;
+
     t = glm::clamp(t, 0.0, 1.0);
-    double t2;
-    if (t < 0.45) {
-        t2 = t * t;
-        return 8 * t2 * t2 * sin(t * PI_D * 9);
-    }
-    else if (t < 0.55) {
-        return 0.5 + 0.75 * sin(t * PI_D * 4);
-    }
-    else {
-        t2 = (t - 1) * (t - 1);
-        return 1 - 8 * t2 * t2 * sin(t * PI_D * 9);
-    }
+    return t == 0
+        ? 0
+        : t == 1
+        ? 1
+        : t < 0.5
+        ? -(pow(2, 20 * t - 10) * sin((20 * t - 11.125) * c5)) * 0.5
+        : (pow(2, -20 * t + 10) * sin((20 * t - 11.125) * c5)) * 0.5 + 1;
 }
 
 double Easings::easeInBounce(double t)
 {
-    t = glm::clamp(t, 0.0, 1.0);
-    return pow(2, 6 * (t - 1)) * abs(sin(t * PI_D * 3.5));
+    return 1 - easeOutBounce(1 - t);
 }
 
 double Easings::easeOutBounce(double t)
 {
+    const double n1 = 7.5625;
+    const double d1 = 2.75;
+
     t = glm::clamp(t, 0.0, 1.0);
-    return 1 - pow(2, -6 * t) * abs(cos(t * PI_D * 3.5));
+    if (t < 1 / d1)
+        return n1 * t * t;
+    else if (t < 2 / d1)
+        return n1 * (t -= 1.5 / d1) * t + 0.75;
+    else if (t < 2.5 / d1)
+        return n1 * (t -= 2.25 / d1) * t + 0.9375;
+    else
+        return n1 * (t -= 2.625 / d1) * t + 0.984375;
 }
 
 double Easings::easeInOutBounce(double t)
 {
-    t = glm::clamp(t, 0.0, 1.0);
-    if (t < 0.5) {
-        return 8 * pow(2, 8 * (t - 1)) * abs(sin(t * PI_D * 7));
-    }
-    else {
-        return 1 - 8 * pow(2, -8 * t) * abs(sin(t * PI_D * 7));
-    }
+    return t < 0.5
+        ? (1 - easeOutBounce(1 - 2 * t)) * 0.5
+        : (1 + easeOutBounce(2 * t - 1)) * 0.5;
 }
