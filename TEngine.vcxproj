@@ -33,6 +33,7 @@
     <ClCompile Include="src\IO\File.cpp" />
     <ClCompile Include="src\MainGame.cpp" />
     <ClCompile Include="src\Random.cpp" />
+    <ClCompile Include="src\RawInput.cpp" />
     <ClCompile Include="src\Rect.cpp" />
     <ClCompile Include="src\RenderTexture.cpp" />
     <ClCompile Include="src\Shader.cpp" />
@@ -63,6 +64,7 @@
     <ClInclude Include="include\tengine\IO\File.h" />
     <ClInclude Include="include\tengine\Keys.h" />
     <ClInclude Include="include\tengine\Random.h" />
+    <ClInclude Include="include\tengine\RawInput.h" />
     <ClInclude Include="include\tengine\Rect.h" />
     <ClInclude Include="include\tengine\RenderTexture.h" />
     <ClInclude Include="include\tengine\Shader.h" />

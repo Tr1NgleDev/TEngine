@@ -78,6 +78,12 @@ void TEngine::GameState::start()
 
 void TEngine::GameState::exit()
 {
+	for (auto& tween : tweens)
+		delete tween;
+	tweens.clear();
+	for (auto& timer : timers)
+		delete timer;
+	timers.clear();
 	MainGame::getInstance()->aResize.remove(resizedActionInd);
 
 	for (auto& obj : std::vector(objects))
@@ -126,8 +132,15 @@ void TEngine::GameState::update(double deltaTime)
 	}
 
 	prevChangedData = changedData;
+
+	updateTimers(deltaTime);
+	updateTweens(deltaTime);
+}
+
+void TEngine::GameState::updateTimers(double deltaTime)
+{
 	if (timers.empty()) return;
-	
+
 	for (int i = 0; i < timers.size();)
 	{
 		if (timers[i] == nullptr)
@@ -151,6 +164,34 @@ void TEngine::GameState::update(double deltaTime)
 					delete timer;
 					timers[i] = nullptr;
 				}
+			}
+			i++;
+		}
+	}
+}
+
+void TEngine::GameState::updateTweens(double deltaTime)
+{
+	if (tweens.empty()) return;
+
+	for (int i = 0; i < tweens.size();)
+	{
+		if (tweens[i] == nullptr)
+		{
+			i = tweens.erase(tweens.begin() + i) - tweens.begin();
+		}
+		else
+		{
+			Tween* tween = tweens[i];
+			double speed = Tween::globalSpeed * tweenSpeed;
+			tween->time = glm::min(tween->time + deltaTime * speed, tween->duration);
+			tween->update();
+			if (tween->time >= tween->duration)
+			{
+				tween->time = tween->duration;
+				tween->update();
+				delete tween;
+				tweens[i] = nullptr;
 			}
 			i++;
 		}

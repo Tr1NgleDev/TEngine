@@ -2,127 +2,51 @@
 
 #include "../include/tengine/Utils.h"
 #include "../include/tengine/MainGame.h"
+#include "../include/tengine/GameState.h"
 
 using namespace TEngine;
 
-void TweenManager::addTween(Tween* tween)
+void Tween::addTo(GameState* state)
 {
-	if (MainGame::getInstance()->curSmthState == MainGame::getInstance()->curOverlayState)
-    {
-        tween->state = 1;
-        tweensOverlayState.push_back(tween);
-    }
-    else
-    {
-        tween->state = 0;
-        tweensState.push_back(tween);
-    }
+    state->tweens.push_back(this);
 }
 
-void TweenManager::update(double deltaTime)
-{
-    for (auto it = tweensState.begin(); it != tweensState.end();)
-    {
-        if (*it == nullptr)
-        {
-            it = tweensState.erase(it);
-        }
-        else 
-        {
-            Tween* tween = *it;
-            double speed = globalSpeed * stateSpeed;
-        	tween->time = min(tween->time + deltaTime * speed, tween->duration);
-            tween->update();
-            if (tween->time >= tween->duration)
-            {
-                tween->time = tween->duration;
-                tween->update();
-                delete tween;
-                *it = nullptr;
-            }
-            ++it;
-        }
-    }
-    for (auto it = tweensOverlayState.begin(); it != tweensOverlayState.end();)
-    {
-        if (*it == nullptr)
-        {
-            it = tweensOverlayState.erase(it);
-        }
-        else
-        {
-            Tween* tween = *it;
-            double speed = globalSpeed * overlayStateSpeed;
-            tween->time = min(tween->time + deltaTime * speed, tween->duration);
-            tween->update();
-            if (tween->time >= tween->duration)
-            {
-                tween->time = tween->duration;
-                tween->update();
-                delete tween;
-                *it = nullptr;
-            }
-            ++it;
-        }
-    }
-}
-
-void TweenManager::stopAll()
-{
-    stopState();
-    stopOverlayState();
-}
-
-void TweenManager::stopState()
-{
-    for (auto& tween : tweensState)
-        delete tween;
-    tweensState.clear();
-}
-
-void TweenManager::stopOverlayState()
-{
-    for (auto& tween : tweensOverlayState)
-        delete tween;
-    tweensOverlayState.clear();
-}
-
-TweenFloat::TweenFloat(double duration, Easings::EasingFunctions easing, float* obj, float value)
+TweenFloat::TweenFloat(GameState* state, double duration, Easings::EasingFunctions easing, float* obj, float value)
 {
     this->duration = duration;
     this->easing = easing;
     this->obj = obj;
     this->startV = *obj;
     this->targetV = value;
-    TweenManager::addTween(this);
+    addTo(state);
 }
 void TweenFloat::update()
 {
     *obj = std::lerp(startV, targetV, (float)Easings::ease(time / duration, easing));
 }
 
-TweenDouble::TweenDouble(double duration, Easings::EasingFunctions easing, double* obj, double value)
+TweenDouble::TweenDouble(GameState* state, double duration, Easings::EasingFunctions easing, double* obj, double value)
 {
     this->duration = duration;
     this->easing = easing;
     this->obj = obj;
     this->startV = *obj;
     this->targetV = value;
-    TweenManager::addTween(this);
+    addTo(state);
 }
 void TweenDouble::update()
 {
     *obj = std::lerp(startV, targetV, Easings::ease(time / duration, easing));
 }
 
-TweenVec2::TweenVec2(double duration, Easings::EasingFunctions easing, glm::vec2* obj, const glm::vec2& value)
+TweenVec2::TweenVec2(GameState* state, double duration, Easings::EasingFunctions easing, glm::vec2* obj, const glm::vec2& value)
 {
     this->duration = duration;
     this->easing = easing;
     this->obj = obj;
     this->startV = *obj;
     this->targetV = value;
-    TweenManager::addTween(this);
+    addTo(state);
 }
 void TweenVec2::update()
 {
@@ -130,28 +54,28 @@ void TweenVec2::update()
     obj->y = std::lerp(startV.y, targetV.y, (float)Easings::ease(time / duration, easing));
 }
 
-TweenInt::TweenInt(double duration, Easings::EasingFunctions easing, int* obj, int value)
+TweenInt::TweenInt(GameState* state, double duration, Easings::EasingFunctions easing, int* obj, int value)
 {
     this->duration = duration;
     this->easing = easing;
     this->obj = obj;
     this->startV = *obj;
     this->targetV = value;
-    TweenManager::addTween(this);
+    addTo(state);
 }
 void TweenInt::update()
 {
     *obj = (int)std::lerp((double)startV, (double)targetV, Easings::ease(time / duration, easing));
 }
 
-TweenColor::TweenColor(double duration, Easings::EasingFunctions easing, Color* obj, const Color& value)
+TweenColor::TweenColor(GameState* state, double duration, Easings::EasingFunctions easing, Color* obj, const Color& value)
 {
     this->duration = duration;
     this->easing = easing;
     this->obj = obj;
     this->startV = *obj;
     this->targetV = value;
-    TweenManager::addTween(this);
+    addTo(state);
 }
 void TweenColor::update()
 {

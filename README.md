@@ -47,9 +47,9 @@ int main()
 	//Console::printLine(CMode(YELLOW, BRIGHT), "and colors too!", CMode(CYAN, BLINKING), " how cool is that?"); // more funny printing
 
     // game width, game height, window width, window height, fullscreen, title
-	MainGame* game = new MainGame(1600, 900, 1280, 720, false, "your window title here");
+	MainGame game = MainGame(1600, 900, 1280, 720, false, "your window title here");
 	// target fps, lambda function that executes on load
-    game->start(120.0, []
+    game.start(120.0, []
 		{
 			MainGame::getInstance()->setVSync(false); // just do this ok. it's better this way.
 		});

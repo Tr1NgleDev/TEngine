@@ -81,18 +81,22 @@ namespace TEngine
 
 		double ease(double t, EasingFunctions easing = Linear);
 	}
+	class GameState;
 	class Tween
 	{
 	protected:
 		double time = 0;
-		unsigned char state = 0;
 
 		Easings::EasingFunctions easing = Easings::Linear;
 		double duration = 0;
 
 		virtual void update() = NULL;
 
-		friend class TweenManager;
+		void addTo(GameState* state);
+
+		friend class GameState;
+	public:
+		inline static double globalSpeed = 1.0;
 	};
 	class TweenFloat : public Tween
 	{
@@ -100,7 +104,7 @@ namespace TEngine
 		float startV = 0;
 		float targetV = 0;
 	public:
-		TweenFloat(double duration, Easings::EasingFunctions easing, float* obj, float value);
+		TweenFloat(GameState* state, double duration, Easings::EasingFunctions easing, float* obj, float value);
 		void update() override;
 	};
 	class TweenDouble : public Tween
@@ -109,7 +113,7 @@ namespace TEngine
 		double startV = 0;
 		double targetV = 0;
 	public:
-		TweenDouble(double duration, Easings::EasingFunctions easing, double* obj, double value);
+		TweenDouble(GameState* state, double duration, Easings::EasingFunctions easing, double* obj, double value);
 		void update() override;
 	};
 	class TweenInt : public Tween
@@ -118,7 +122,7 @@ namespace TEngine
 		int startV = 0;
 		int targetV = 0;
 	public:
-		TweenInt(double duration, Easings::EasingFunctions easing, int* obj, int value);
+		TweenInt(GameState* state, double duration, Easings::EasingFunctions easing, int* obj, int value);
 		void update() override;
 	};
 	class TweenVec2 : public Tween
@@ -127,7 +131,7 @@ namespace TEngine
 		glm::vec2 startV = glm::vec2(0);
 		glm::vec2 targetV = glm::vec2(0);
 	public:
-		TweenVec2(double duration, Easings::EasingFunctions easing, glm::vec2* obj, const glm::vec2& value);
+		TweenVec2(GameState* state, double duration, Easings::EasingFunctions easing, glm::vec2* obj, const glm::vec2& value);
 		void update() override;
 	};
 	class TweenColor : public Tween
@@ -136,21 +140,7 @@ namespace TEngine
 		Color startV;
 		Color targetV;
 	public:
-		TweenColor(double duration, Easings::EasingFunctions easing, Color* obj, const Color& value);
+		TweenColor(GameState* state, double duration, Easings::EasingFunctions easing, Color* obj, const Color& value);
 		void update() override;
-	};
-	class TweenManager
-	{
-		inline static std::vector<Tween*> tweensState;
-		inline static std::vector<Tween*> tweensOverlayState;
-	public:
-		inline static double globalSpeed = 1.0;
-		inline static double stateSpeed = 1.0;
-		inline static double overlayStateSpeed = 1.0;
-		static void addTween(Tween* tween);
-		static void update(double deltaTime);
-		static void stopAll();
-		static void stopState();
-		static void stopOverlayState();
 	};
 }

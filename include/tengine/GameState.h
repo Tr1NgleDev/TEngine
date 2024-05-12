@@ -8,11 +8,13 @@ namespace TEngine
 	class GameObject;
 	class Sprite;
 	class Timer;
+	class Tween;
 	class GameState
 	{
 	private:
 		int resizedActionInd = -1;
 		std::vector<Timer*> timers;
+		std::vector<Tween*> tweens;
 		Sprite* trans;
 		//std::vector<GameObject*> allObjects;
 		struct
@@ -28,9 +30,15 @@ namespace TEngine
 		bool prevChangedData = true;
 
 		bool resort = true;
+
+		void updateTimers(double deltaTime);
+		void updateTweens(double deltaTime);
+
 		friend class MainGame;
 		friend class Timer;
+		friend class Tween;
 	public:
+		double tweenSpeed = 1.0;
 		// doesnt apply to overlay states
 		float backTransparency = 1;
 		//std::map<int, std::vector<GameObject*>> objects;

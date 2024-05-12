@@ -9,6 +9,8 @@
 #include "../include/tengine/Text.h"
 #include "../include/tengine/Gradient.h"
 
+#include "../include/tengine/RawInput.h"
+
 void TEngine::MainGame::errorCallback(int error, const char* description)
 {
 	Console::print(CMode(RED, BRIGHT), std::format("GLFW Error: {}: {}\n", error, description));
@@ -154,9 +156,6 @@ void TEngine::MainGame::frameUpdate(double deltaTime, double unclampedDT)
 	glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 	glClearColor(0, 0, 0, backTransparency);
 	glClear(GL_COLOR_BUFFER_BIT);
-
-	// update
-	TweenManager::update(deltaTime);
 	
 	if (!MainGame::_instance->switchingStates)
 		if (MainGame::_instance->curState)
@@ -410,7 +409,13 @@ bool TEngine::MainGame::isWindowed() const
 
 void TEngine::MainGame::closed()
 {
-	TweenManager::stopAll();
+	//TweenManager::stopAll();
+	if (RawInput::initialized)
+	{
+		if(RawInput::riHWND != nullptr)
+			CloseWindow(RawInput::riHWND);
+
+	}
 	unloadState();
 	unloadOverlayState();
 	Shader::disposeShaders();
@@ -485,7 +490,6 @@ void TEngine::MainGame::loadOverlayState(GameState* s)
 
 void TEngine::MainGame::unloadState()
 {
-	TweenManager::stopState();
 	if (curState)
 	{
 		curState->exit();
@@ -496,7 +500,6 @@ void TEngine::MainGame::unloadState()
 
 void TEngine::MainGame::unloadOverlayState()
 {
-	TweenManager::stopOverlayState();
 	if (curOverlayState)
 	{
 		curOverlayState->exit();
