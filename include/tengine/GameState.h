@@ -34,6 +34,8 @@ namespace TEngine
 		void updateTimers(double deltaTime);
 		void updateTweens(double deltaTime);
 
+		bool switching = false;
+
 		friend class MainGame;
 		friend class Timer;
 		friend class Tween;

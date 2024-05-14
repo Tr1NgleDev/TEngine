@@ -24,4 +24,6 @@
 #include <cstring>
 #include <fstream>
 #include <set>
+#include <thread>
+#include <future>
 #include "Dynamic.h"

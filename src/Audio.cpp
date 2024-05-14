@@ -80,8 +80,8 @@ void TEngine::Sound::setPos(double pos) const
 
 double TEngine::Sound::length() const
 {
-	if (_id != 1)
-		BASS_ChannelBytes2Seconds(_id, BASS_ChannelGetLength(_id, BASS_POS_BYTE));
+	if (_id != 0)
+		return BASS_ChannelBytes2Seconds(_id, BASS_ChannelGetLength(_id, BASS_POS_BYTE));
 	return 0;
 }
 

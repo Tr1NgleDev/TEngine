@@ -32,17 +32,15 @@ namespace TEngine
 
 	public:
 		// highly experimental
-		bool instancedRendering = true;
+		bool instancedRendering = false;
 
 		float backTransparency = 1;
 		double targetDeltaTime = 0.001;
 		int gameWidth = 0, gameHeight = 0;
 
-		bool switchingStates = false;
-		bool switchingOverlayStates = false;
-
-		GameState* curState;
+		std::vector<GameState*> curStates;
 		GameState* curOverlayState;
+
 		GameState* curUpdateState;
 		GameState* curRenderState;
 		GameState* curStartState;
@@ -90,10 +88,12 @@ namespace TEngine
 
 		bool isWindowed() const;
 
-		void loadState(GameState* s);
-		void loadOverlayState(GameState* s);
-		void unloadState();
-		void unloadOverlayState();
+		void addState(GameState* s); // adds a state on top of other curstates
+		void loadState(GameState* s); // unloads all curstates and loads in a new one
+		void loadOverlayState(GameState* s); // unloads current overlaystate and loads in a new one
+		void unloadState(GameState*& s); // unloads a single state
+		void unloadStates(); // unloads all curstates
+		void unloadOverlayState(); // unloads the overlaystate
 
 		bool isFocused() const;
 

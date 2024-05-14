@@ -156,65 +156,68 @@ void TEngine::MainGame::frameUpdate(double deltaTime, double unclampedDT)
 	glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 	glClearColor(0, 0, 0, backTransparency);
 	glClear(GL_COLOR_BUFFER_BIT);
-	
-	if (!MainGame::_instance->switchingStates)
-		if (MainGame::_instance->curState)
+
+	for (auto& state : curStates)
+	{
+		if (state == nullptr) continue;
+		if (!state->switching)
 		{
-			MainGame::_instance->curUpdateState = MainGame::_instance->curState;
-			MainGame::_instance->curSmthState = MainGame::_instance->curState;
-			if (!MainGame::_instance->curState->transOut)
-				MainGame::_instance->curState->update(MainGame::_instance->_deltaTime);
+			curUpdateState = state;
+			curSmthState = state;
+			state->update(_deltaTime);
 		}
-	if (!MainGame::_instance->switchingOverlayStates)
-		if (MainGame::_instance->curOverlayState)
+	}
+	if (curOverlayState)
+		if (!curOverlayState->switching)
 		{
-			MainGame::_instance->curUpdateState = MainGame::_instance->curOverlayState;
-			MainGame::_instance->curSmthState = MainGame::_instance->curOverlayState;
-			if (!MainGame::_instance->curOverlayState->transOut)
-				MainGame::_instance->curOverlayState->update(MainGame::_instance->_deltaTime);
+			curUpdateState = curOverlayState;
+			curSmthState = curOverlayState;
+			curOverlayState->update(_deltaTime);
 		}
 	
 	// render
-	if (curState)
+	int i = 0;
+	for (auto& state : curStates)
 	{
-		curSmthState = curState;
-		if (curState->changedData)
+		if (state == nullptr) { i++; continue; }
+		curSmthState = state;
+		if (state->changedData)
 		{
-			curState->prevChangedData = true;
-			curState->changedData = false;
-			const float invZoom = 1.f / curState->getZoom();
-			const float w = (float)curState->w * curState->targetScale;
-			const float h = (float)curState->h * curState->targetScale;
+			state->prevChangedData = true;
+			state->changedData = false;
+			const float invZoom = 1.f / state->getZoom();
+			const float w = (float)state->w * state->targetScale;
+			const float h = (float)state->h * state->targetScale;
 
-			const float x = curState->cam.x * curState->targetScale - w * 0.5f * invZoom + w * 0.5f;
-			const float y = curState->cam.y * curState->targetScale - h * 0.5f * invZoom + h * 0.5f;
+			const float x = state->cam.x * state->targetScale - w * 0.5f * invZoom + w * 0.5f;
+			const float y = state->cam.y * state->targetScale - h * 0.5f * invZoom + h * 0.5f;
 
 			const float centerX = x + w * invZoom * 0.5f;
 			const float centerY = y + h * invZoom * 0.5f;
 
 			glm::mat4 viewMat = glm::mat4(1.0);
 			Utils::translate(viewMat, -centerX, -centerY);
-			Utils::rotate(viewMat, glm::radians(curState->cam.angle));
+			Utils::rotate(viewMat, glm::radians(state->cam.angle));
 			Utils::translate(viewMat, centerX, centerY);
 
 			const glm::mat4 projMat = glm::ortho(x, x + w * invZoom, y + h * invZoom, y, -1.f, 1.f);
 
-			curState->projMat = projMat;
-			curState->viewMat = viewMat;
+			state->projMat = projMat;
+			state->viewMat = viewMat;
 		}
-		curRenderState = curState;
-
-		curState->renderTex.renderBegin(0, 0, 0, curState->backTransparency);
+		curRenderState = state;
+		state->renderTex.renderBegin(0, 0, 0, i == 0 ? state->backTransparency : 0);
 		glEnable(GL_MULTISAMPLE);
 		//glViewport(0, 0, (int)((float)curState->renderTex.w * curState->renderTex.getResScale()), (int)((float)curState->renderTex.h * curState->renderTex.getResScale()));
-		curState->render(unclampedDT);
-		glViewport((int)curState->offsetX, (int)curState->offsetY, (int)((float)curState->w * curState->targetScale), (int)((float)curState->h * curState->targetScale));
-		curState->renderTex.renderEnd(true);
-		if (curState->transOut && curState->trans->color.a >= 1.f)
+		state->render(unclampedDT);
+		glViewport((int)state->offsetX, (int)state->offsetY, (int)((float)state->w * state->targetScale), (int)((float)state->h * state->targetScale));
+		state->renderTex.renderEnd(true);
+		if (state->transOut && state->trans->color.a >= 1.f)
 		{
-			curState->transOut = false;
-			curState->finishedTransOut();
+			state->transOut = false;
+			state->finishedTransOut();
 		}
+		i++;
 	}
 	if (curOverlayState)
 	{
@@ -416,7 +419,7 @@ void TEngine::MainGame::closed()
 			CloseWindow(RawInput::riHWND);
 
 	}
-	unloadState();
+	unloadStates();
 	unloadOverlayState();
 	Shader::disposeShaders();
 	for (auto& tex : Texture::loadedTextures)
@@ -437,40 +440,48 @@ void TEngine::MainGame::closed()
 	glBindVertexArray(0);
 }
 
+void TEngine::MainGame::addState(GameState* s)
+{
+	curStates.push_back(s);
+	curStartState = curStates.back();
+	curSmthState = curStates.back();
+
+	curStates.back()->renderTime += 1.1f; // dont transition
+	curStates.back()->start();
+	curStates.back()->resized(getWidth(), getHeight());
+}
+
 void TEngine::MainGame::loadState(GameState* s)
 {
-	switchingStates = true;
+	for(auto& state : curStates) state->switching = true;
 	nextState = s;
 	auto fin = []
 		{
-			if (!MainGame::getInstance()->switchingStates) return;
-			MainGame::getInstance()->switchingStates = false;
-			MainGame::getInstance()->unloadState();
-			MainGame::getInstance()->curState = MainGame::getInstance()->nextState;
+			MainGame::getInstance()->unloadStates();
+			MainGame::getInstance()->curStates.push_back(MainGame::getInstance()->nextState);
 			MainGame::getInstance()->curStartState = MainGame::getInstance()->nextState;
 			MainGame::getInstance()->curSmthState = MainGame::getInstance()->nextState;
 		
-			MainGame::getInstance()->curState->start();
-			MainGame::getInstance()->curState->resized(MainGame::getInstance()->getWidth(), MainGame::getInstance()->getHeight());
+			MainGame::getInstance()->curStates.back()->start();
+			MainGame::getInstance()->curStates.back()->resized(MainGame::getInstance()->getWidth(), MainGame::getInstance()->getHeight());
 		};
-	if (curState && !curState->transOut)
+	if (!curStates.empty() && curStates.back() && !curStates.back()->transOut)
 	{
-		curState->transOut = true;
-		curState->transStart = curState->renderTime;
-		curState->finishedTransOut.add(fin);
+		curStates.back()->transOut = true;
+		curStates.back()->transStart = curStates.back()->renderTime;
+		curStates.back()->finishedTransOut.add(fin);
 	}
-	else if (!curState)
+	else if (curStates.empty() || !curStates.back())
 		fin();
 }
 
 void TEngine::MainGame::loadOverlayState(GameState* s)
 {
-	switchingOverlayStates = true;
+	if(curOverlayState)
+		curOverlayState->switching = true;
 	nextOverlayState = s;
 	auto fin = []
 		{
-			if (!MainGame::getInstance()->switchingOverlayStates) return;
-			MainGame::getInstance()->switchingOverlayStates = false;
 			MainGame::getInstance()->unloadOverlayState();
 			MainGame::getInstance()->curOverlayState = MainGame::getInstance()->nextOverlayState;
 			MainGame::getInstance()->curStartState = MainGame::getInstance()->nextOverlayState;
@@ -488,14 +499,21 @@ void TEngine::MainGame::loadOverlayState(GameState* s)
 		fin();
 }
 
-void TEngine::MainGame::unloadState()
+void TEngine::MainGame::unloadState(GameState*& state)
 {
-	if (curState)
+	if (state)
 	{
-		curState->exit();
-		delete curState;
-		curState = nullptr;
+		state->exit();
+		delete state;
+		state = nullptr;
 	}
+}
+
+void TEngine::MainGame::unloadStates()
+{
+	for (auto& state : curStates)
+		unloadState(state);
+	curStates.clear();
 }
 
 void TEngine::MainGame::unloadOverlayState()

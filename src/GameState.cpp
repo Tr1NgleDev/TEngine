@@ -112,18 +112,19 @@ void TEngine::GameState::update(double deltaTime)
 		prevRTW = renderTex.w;
 		prevRTH = renderTex.h;
 	}
-	if (transOut)
+	if (transOut || switching)
 		return;
 
 	stateTime += deltaTime;
-
+	
 	for (auto it = objects.begin(); it < objects.end();)
 	{
-		if (*it == nullptr)
-		{
-			it = objects.erase(it);
-			continue;
-		}
+		//if (*it == nullptr)
+		//{
+			//it = objects.erase(it);
+			//it++;
+			//continue;
+		//}
 		GameObject* obj = *it;
 		if (obj->active)
 			obj->update(deltaTime);
@@ -215,11 +216,12 @@ void TEngine::GameState::render(double deltaTime)
 	//glViewport(0, 0, (int)((float)renderTex.w * renderTex.getResScale()), (int)((float)renderTex.h * renderTex.getResScale()));
 	for (auto it = objects.begin(); it < objects.end();)
 	{
-		if (*it == nullptr)
-		{
-			it = objects.erase(it);
-			continue;
-		}
+		//if (*it == nullptr)
+		//{
+			//it = objects.erase(it);
+			//i++;
+			//continue;
+		//}
 		GameObject* obj = *it;
 		if (obj->active && obj->visible)
 			obj->render(deltaTime);
