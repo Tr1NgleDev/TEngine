@@ -26,8 +26,6 @@ namespace TEngine
 		} prevCam;
 		// prev RenderTexture stuff
 		int prevRTW, prevRTH;
-		bool changedData = true;
-		bool prevChangedData = true;
 
 		bool resort = true;
 
@@ -36,13 +34,15 @@ namespace TEngine
 
 		bool switching = false;
 
+		void updateMatrices();
+
 		friend class MainGame;
 		friend class Timer;
 		friend class Tween;
 	public:
 		double tweenSpeed = 1.0;
 		double timerSpeed = 1.0;
-		// doesnt apply to overlay states
+		// doesnt apply to overlay states and doesnt apply to states in curStates above the first state
 		float backTransparency = 1;
 		//std::map<int, std::vector<GameObject*>> objects;
 		std::vector<GameObject*> objects;

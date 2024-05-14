@@ -181,7 +181,7 @@ void TEngine::MainGame::frameUpdate(double deltaTime, double unclampedDT)
 	{
 		if (state == nullptr) { i++; continue; }
 		curSmthState = state;
-		if (state->changedData)
+		/*if (state->changedData)
 		{
 			state->prevChangedData = true;
 			state->changedData = false;
@@ -204,8 +204,9 @@ void TEngine::MainGame::frameUpdate(double deltaTime, double unclampedDT)
 
 			state->projMat = projMat;
 			state->viewMat = viewMat;
-		}
+		}*/
 		curRenderState = state;
+
 		state->renderTex.renderBegin(0, 0, 0, i == 0 ? state->backTransparency : 0);
 		glEnable(GL_MULTISAMPLE);
 		//glViewport(0, 0, (int)((float)curState->renderTex.w * curState->renderTex.getResScale()), (int)((float)curState->renderTex.h * curState->renderTex.getResScale()));
@@ -222,7 +223,7 @@ void TEngine::MainGame::frameUpdate(double deltaTime, double unclampedDT)
 	if (curOverlayState)
 	{
 		curSmthState = curOverlayState;
-		if (curOverlayState->changedData)
+		/*if (curOverlayState->changedData)
 		{
 			curOverlayState->prevChangedData = true;
 			curOverlayState->changedData = false;
@@ -245,7 +246,7 @@ void TEngine::MainGame::frameUpdate(double deltaTime, double unclampedDT)
 
 			curOverlayState->projMat = projMat;
 			curOverlayState->viewMat = viewMat;
-		}
+		}*/
 		curRenderState = curOverlayState;
 
 		curOverlayState->renderTex.renderBegin(0, 0, 0, 0);

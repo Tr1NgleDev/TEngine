@@ -15,8 +15,6 @@ TEngine::GameState::GameState()
 void TEngine::GameState::resized(int width, int height)
 {
 	if (this == nullptr) return;
-	prevChangedData = true;
-	changedData = true;
 	targetScale = fminf((float)width / (float)w, (float)height / (float)h);
 
 	offsetX = roundf(((float)width - ((float)w * targetScale)) / 2.0f);
@@ -24,6 +22,8 @@ void TEngine::GameState::resized(int width, int height)
 
 	if (renderTex.state && renderTex.useScreenRes)
 		renderTex.resized();
+
+	updateMatrices();
 }
 
 void TEngine::GameState::add(GameObject* obj)
@@ -100,18 +100,28 @@ void TEngine::GameState::exit()
 	renderTex.dispose(true);
 }
 
+void TEngine::GameState::updateMatrices()
+{
+	const float invZoom = 1.f / getZoom();
+	const float w = (float)this->w * targetScale;
+	const float h = (float)this->h * targetScale;
+
+	const float x = cam.x * targetScale - w * 0.5f * invZoom + w * 0.5f;
+	const float y = cam.y * targetScale - h * 0.5f * invZoom + h * 0.5f;
+
+	const float centerX = x + w * invZoom * 0.5f;
+	const float centerY = y + h * invZoom * 0.5f;
+
+	viewMat = glm::mat4(1.0);
+	Utils::translate(viewMat, -centerX, -centerY);
+	Utils::rotate(viewMat, glm::radians(cam.angle));
+	Utils::translate(viewMat, centerX, centerY);
+
+	projMat = glm::ortho(x, x + w * invZoom, y + h * invZoom, y, -1.f, 1.f);
+}
+
 void TEngine::GameState::update(double deltaTime)
 {
-	if(cam.x != prevCam.x || cam.y != prevCam.y || cam.angle != prevCam.angle || cam.zoom != prevCam.zoom || renderTex.w != prevRTW || renderTex.w != prevRTH)
-	{
-		changedData = true;
-		prevCam.x = cam.x;
-		prevCam.y = cam.y;
-		prevCam.angle = cam.angle;
-		prevCam.zoom = cam.zoom;
-		prevRTW = renderTex.w;
-		prevRTH = renderTex.h;
-	}
 	if (transOut || switching)
 		return;
 
@@ -130,9 +140,6 @@ void TEngine::GameState::update(double deltaTime)
 			obj->update(deltaTime);
 		it++;
 	}
-
-	prevChangedData = changedData;
-
 	updateTimers(deltaTime);
 	updateTweens(deltaTime);
 }
@@ -201,6 +208,17 @@ void TEngine::GameState::updateTweens(double deltaTime)
 
 void TEngine::GameState::render(double deltaTime)
 {
+	if (cam.x != prevCam.x || cam.y != prevCam.y || cam.angle != prevCam.angle || cam.zoom != prevCam.zoom || renderTex.w != prevRTW || renderTex.w != prevRTH)
+	{
+		prevCam.x = cam.x;
+		prevCam.y = cam.y;
+		prevCam.angle = cam.angle;
+		prevCam.zoom = cam.zoom;
+		prevRTW = renderTex.w;
+		prevRTH = renderTex.h;
+		updateMatrices();
+	}
+
 	renderTex.renderBegin();
 	
 	if (resort)
