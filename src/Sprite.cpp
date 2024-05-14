@@ -77,6 +77,8 @@ void TEngine::Sprite::init()
 
 	glBindVertexArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	instancing = MainGame::getInstance()->instancedRendering;
 }
 
 bool TEngine::Sprite::getAntialiased() const
@@ -163,6 +165,9 @@ void TEngine::Sprite::setGraphicSize(int width, int height)
 
 void TEngine::Sprite::render(double deltaTime)
 {
+	if (instancing != MainGame::getInstance()->instancedRendering)
+		init();
+
 	glm::vec2 pos = parallaxPos();
 	if (dontRenderOutside)
 	{

@@ -8,6 +8,7 @@ namespace TEngine
 	class Timer
 	{
 	public: 
+		inline static double globalSpeed = 1.0;
 		double time = 0.;
 		double duration = 0.;
 		int ind = 1;

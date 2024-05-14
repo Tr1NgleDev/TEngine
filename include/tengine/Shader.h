@@ -21,6 +21,8 @@ namespace TEngine
 	public:
 		inline static std::unordered_map<std::string, Shader*> shaders;
 
+		std::string name;
+
 		static void disposeShaders();
 		static const Shader* get(const std::string& name);
 		static const Shader* load(const std::string& vertexPath, const std::string& fragmentPath, const std::string& name);

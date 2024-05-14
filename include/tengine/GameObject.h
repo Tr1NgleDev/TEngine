@@ -23,10 +23,10 @@ namespace TEngine
         glm::vec2 position{0};
         float angle = 0;
         glm::vec2 scale{ 1,1 };
+        BlendMode blending = BlendMode::Normal;
         bool visible = true;
         bool active = true;
         GameState* state;
-        BlendMode blending = BlendMode::Normal;
 
         float parallaxX = 0.0;
         float parallaxY = 0.0;

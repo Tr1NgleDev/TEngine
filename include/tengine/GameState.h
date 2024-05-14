@@ -39,6 +39,7 @@ namespace TEngine
 		friend class Tween;
 	public:
 		double tweenSpeed = 1.0;
+		double timerSpeed = 1.0;
 		// doesnt apply to overlay states
 		float backTransparency = 1;
 		//std::map<int, std::vector<GameObject*>> objects;

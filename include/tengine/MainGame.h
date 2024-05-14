@@ -31,6 +31,9 @@ namespace TEngine
 		void closed();
 
 	public:
+		// highly experimental
+		bool instancedRendering = true;
+
 		float backTransparency = 1;
 		double targetDeltaTime = 0.001;
 		int gameWidth = 0, gameHeight = 0;

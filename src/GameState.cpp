@@ -34,7 +34,7 @@ void TEngine::GameState::add(GameObject* obj)
 		obj->_zOrder = 0;
 
 	objects.push_back(obj);
-	updateOrdering();
+	//updateOrdering();
 
 	obj->state = this;
 	obj->start();
@@ -54,7 +54,7 @@ void TEngine::GameState::add(GameObject* obj, int zOrder)
 void TEngine::GameState::remove(GameObject* obj)
 {
 	VECTOR_REMOVE(objects, obj);
-	updateOrdering();
+	//updateOrdering();
 }
 
 void TEngine::GameState::updateOrdering()
@@ -86,16 +86,15 @@ void TEngine::GameState::exit()
 	timers.clear();
 	MainGame::getInstance()->aResize.remove(resizedActionInd);
 
-	for (auto& obj : std::vector(objects))
+	for (auto& obj : objects)
 	{
 		if (!obj) continue;
-		remove(obj);
 		obj->destroy();
 		delete obj;
 	}
 	objects.clear();
-	objects.clear();
 
+	trans->destroy();
 	delete trans;
 
 	renderTex.dispose(true);
@@ -150,7 +149,8 @@ void TEngine::GameState::updateTimers(double deltaTime)
 		else
 		{
 			Timer* timer = timers[i];
-			timer->time += deltaTime;
+			double speed = Timer::globalSpeed * timerSpeed;
+			timer->time += deltaTime * speed;
 			if (timer->time >= timer->duration)
 			{
 				timer->callback();
@@ -228,10 +228,10 @@ void TEngine::GameState::render(double deltaTime)
 	
 	if (trans == nullptr) return;
 	if (renderTime <= 1)
-		trans->color.a = 1 - Easings::easeOutQuad(renderTime / 0.2f);
+		trans->color.a = 1 - Easings::easeOutCirc(renderTime / 0.2f);
 	else if (transOut)
 	{
-		trans->color.a = Easings::easeInQuad((renderTime - transStart) / 0.2f);
+		trans->color.a = Easings::easeOutCirc((renderTime - transStart) / 0.2f);
 	}
 	if(renderTime <= 1 || transOut)
 	{

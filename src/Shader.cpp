@@ -54,11 +54,12 @@ TEngine::Shader::Shader(const char* vertexSource, const char* fragmentSource)
 
 const TEngine::Shader* TEngine::Shader::loadFromSource(const char* vertexSource, const char* fragmentSource, const std::string& name)
 {
-	auto shader = new Shader(vertexSource, fragmentSource);
+	Shader* shader = new Shader(vertexSource, fragmentSource);
 
 	if (shaders.contains(name))
 		delete shaders[name];
 
+	shader->name = name;
 	shaders[name] = shader;
 
 	return shader;
@@ -155,11 +156,12 @@ const TEngine::Shader* TEngine::Shader::get(const std::string& name)
 
 const TEngine::Shader* TEngine::Shader::load(const std::string& vertexPath, const std::string& fragmentPath, const std::string& name)
 {
-	auto shader = new Shader(vertexPath, fragmentPath);
+	Shader* shader = new Shader(vertexPath, fragmentPath);
 
 	if (shaders.contains(name))
 		delete shaders[name];
 
+	shader->name = name;
 	shaders[name] = shader;
 
 	return shader;

@@ -15,6 +15,7 @@ namespace TEngine
 	private:
 		bool _antialiased = true;
 	public:
+		inline static bool instancing = false;
 		inline static unsigned int VAO = 0, curVAO = 0;
 		inline static unsigned int VBO = 0;
 		inline static constexpr uint8_t vertices[] =
@@ -43,15 +44,19 @@ namespace TEngine
 		inline static const std::string fragPath = "assets/shaders/spriteFrag.glsl";
 		inline static const std::string shaderName = "TEngine::SpriteShader";
 
+		inline static const std::string i_vertPath = "assets/shaders/instanced/spriteVert.glsl";
+		inline static const std::string i_fragPath = "assets/shaders/instanced/spriteFrag.glsl";
+		inline static const std::string i_shaderName = "TEngine::InstancedSpriteShader";
+
 		const Shader* shader;
 		Texture* tex;
 		Color color;
 
 		bool flipX, flipY;
 
-		bool dontRenderOutside = true;
-
 		glm::vec2 offset{0};
+
+		bool dontRenderOutside = true;
 
 		Sprite(Texture* texture);
 		Sprite(const Color& color);
